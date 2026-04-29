@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 import { Hero } from "@/components/sections/hero";
 import { Problem } from "@/components/sections/problem";
 import { HowItWorks } from "@/components/sections/how-it-works";
@@ -5,6 +7,13 @@ import { Pricing } from "@/components/sections/pricing";
 import { FAQ } from "@/components/sections/faq";
 import { FinalCTA } from "@/components/sections/final-cta";
 import { SiteFooter } from "@/components/site-footer";
+import { HOME_TITLE, SITE_DESCRIPTION, SITE_URL } from "@/lib/constants";
+
+export const metadata: Metadata = {
+  title: { absolute: HOME_TITLE },
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: SITE_URL },
+};
 
 // Hero audio sample (Vapi recording) is gated by the build-time env var
 // NEXT_PUBLIC_AUDIO_SAMPLE_AVAILABLE. While unset (or any value other than
