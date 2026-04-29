@@ -6,7 +6,7 @@ export function SiteFooter() {
     <footer className="bg-white py-10">
       <div className="mx-auto max-w-6xl px-6 text-center text-sm text-[color:var(--brand-muted)]">
         <p>
-          &copy; 2026 RingDesk. Built in Berthoud, Colorado.{" "}
+          &copy; 2026 RingDesk.{" "}
           <Link
             href="/privacy"
             className="hover:text-[color:var(--brand-slate)]"
