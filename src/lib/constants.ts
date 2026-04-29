@@ -16,9 +16,9 @@ export const RINGDESK_PHONE = "+1-970-528-8725";
 export const CALENDLY_URL =
   "https://calendly.com/tony-ringdesk/ringdesk-discovery-call";
 
-// ⚠️ ACTION REQUIRED: Replace with real Stripe payment links in Block 4.
-// For now both fall back to the Calendly discovery call.
-export const STRIPE_STANDARD_URL = CALENDLY_URL;
-export const STRIPE_PREMIUM_URL = CALENDLY_URL;
+export const STRIPE_STANDARD_URL =
+  "https://buy.stripe.com/cNicN79cp8yQe8ibT104800";
+export const STRIPE_PREMIUM_URL =
+  "https://buy.stripe.com/dRm00l60d7uM3tE2ir04801";
 
 export const CONTACT_EMAIL = "tony@ringdesk.co";
