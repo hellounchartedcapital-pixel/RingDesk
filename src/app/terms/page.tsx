@@ -3,10 +3,10 @@ import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — RingDesk",
-  description:
-    "Terms governing your use of RingDesk, the managed AI receptionist service.",
+  title: "Terms of Service",
+  description: "Terms governing use of RingDesk's AI receptionist service.",
   alternates: { canonical: "https://ringdesk.co/terms" },
+  robots: { index: true, follow: true },
 };
 
 export default function TermsPage() {

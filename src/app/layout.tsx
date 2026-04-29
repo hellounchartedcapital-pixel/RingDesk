@@ -1,6 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+
+import {
+  OG_IMAGE_ALT,
+  OG_IMAGE_PATH,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_TITLE_DEFAULT,
+  SITE_URL,
+} from "@/lib/constants";
+import { SITE_SCHEMA } from "@/lib/schema";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -9,35 +19,46 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ringdesk.co"),
-  title: "RingDesk — AI receptionist for trades",
-  description:
-    "Stop missing service calls. RingDesk is an AI receptionist installed and tuned by a real person. Answers every call, qualifies leads, texts you urgent ones.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_TITLE_DEFAULT,
+    template: "%s | RingDesk",
+  },
+  description: SITE_DESCRIPTION,
   alternates: {
-    canonical: "https://ringdesk.co",
+    canonical: SITE_URL,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
   openGraph: {
     type: "website",
-    url: "https://ringdesk.co",
-    title: "RingDesk — AI receptionist for trades",
-    description:
-      "Stop missing service calls. RingDesk is an AI receptionist installed and tuned by a real person. Answers every call, qualifies leads, texts you urgent ones.",
-    siteName: "RingDesk",
+    locale: "en_US",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: SITE_TITLE_DEFAULT,
+    description: SITE_DESCRIPTION,
     images: [
       {
-        url: "/og-image.png",
+        url: OG_IMAGE_PATH,
         width: 1200,
         height: 630,
-        alt: "RingDesk — AI receptionist for trades",
+        alt: OG_IMAGE_ALT,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "RingDesk — AI receptionist for trades",
-    description:
-      "Stop missing service calls. RingDesk is an AI receptionist installed and tuned by a real person. Answers every call, qualifies leads, texts you urgent ones.",
-    images: ["/og-image.png"],
+    title: SITE_TITLE_DEFAULT,
+    description: SITE_DESCRIPTION,
+    images: [OG_IMAGE_PATH],
   },
   icons: {
     icon: [
@@ -46,7 +67,11 @@ export const metadata: Metadata = {
       { url: "/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
     ],
     apple: [
-      { url: "/favicon/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      {
+        url: "/favicon/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
     ],
     other: [
       {
@@ -66,6 +91,12 @@ export const metadata: Metadata = {
   manifest: "/favicon/site.webmanifest",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -73,7 +104,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.variable} antialiased`}>{children}</body>
+      <body className={`${inter.variable} antialiased`}>
+        {children}
+        <script
+          type="application/ld+json"
+          // Static structured data — does not change per-render.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_SCHEMA) }}
+        />
+      </body>
     </html>
   );
 }

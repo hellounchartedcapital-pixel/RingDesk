@@ -3,10 +3,10 @@ import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — RingDesk",
-  description:
-    "How RingDesk collects, uses, shares, and protects information about Customers and Callers.",
+  title: "Privacy Policy",
+  description: "How RingDesk collects, uses, and protects your information.",
   alternates: { canonical: "https://ringdesk.co/privacy" },
+  robots: { index: true, follow: true },
 };
 
 const PROCESSORS: { name: string; href: string }[] = [
