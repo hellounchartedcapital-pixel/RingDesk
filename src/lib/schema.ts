@@ -5,6 +5,7 @@ import {
   SITE_URL,
 } from "@/lib/constants";
 import { faqs } from "@/lib/faq";
+import type { FAQ } from "@/lib/trades";
 
 const BUSINESS_ID = `${SITE_URL}/#business`;
 
@@ -89,19 +90,73 @@ const premiumService = service({
   price: "499",
 });
 
-const faqPage = {
-  "@type": "FAQPage",
-  mainEntity: faqs.map((faq) => ({
-    "@type": "Question",
-    name: faq.question,
-    acceptedAnswer: {
-      "@type": "Answer",
-      text: faq.answer,
-    },
-  })),
-};
+export function buildFaqPageSchema(items: FAQ[]) {
+  return {
+    "@type": "FAQPage",
+    mainEntity: items.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  };
+}
 
+// Sitewide @graph rendered from the root layout. Intentionally does NOT
+// include FAQPage — Google's guidance is that FAQPage should only appear
+// on pages where the FAQ is actually rendered, so each page that shows
+// FAQs (homepage, trade pages) injects its own FAQPage separately.
 export const SITE_SCHEMA = {
   "@context": "https://schema.org",
-  "@graph": [localBusiness, standardService, premiumService, faqPage],
+  "@graph": [localBusiness, standardService, premiumService],
 };
+
+export const HOME_FAQ_SCHEMA = {
+  "@context": "https://schema.org",
+  "@graph": [buildFaqPageSchema(faqs)],
+};
+
+export function buildTradePageSchema(items: FAQ[]) {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [buildFaqPageSchema(items)],
+  };
+}
+
+export function buildLocationBusinessSchema({
+  slug,
+  city,
+  url,
+}: {
+  slug: string;
+  city: string;
+  url: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "LocalBusiness",
+        "@id": `${SITE_URL}/#business-${slug}`,
+        name: `RingDesk — ${city}`,
+        description: `AI receptionist service for trades businesses in ${city}, Colorado.`,
+        url,
+        telephone: RINGDESK_PHONE,
+        email: CONTACT_EMAIL,
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: city,
+          addressRegion: "CO",
+          addressCountry: "US",
+        },
+        areaServed: { "@type": "City", name: city },
+        priceRange: "$249-$499",
+        image: `${SITE_URL}${OG_IMAGE_PATH}`,
+        logo: `${SITE_URL}/ringdesk-logo.png`,
+        parentOrganization: { "@id": BUSINESS_ID },
+      },
+    ],
+  };
+}
