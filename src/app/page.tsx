@@ -6,8 +6,10 @@ import { HowItWorks } from "@/components/sections/how-it-works";
 import { Pricing } from "@/components/sections/pricing";
 import { FAQ } from "@/components/sections/faq";
 import { FinalCTA } from "@/components/sections/final-cta";
+import { TradesCrossLinks } from "@/components/sections/trades-cross-links";
 import { SiteFooter } from "@/components/site-footer";
 import { HOME_TITLE, SITE_DESCRIPTION, SITE_URL } from "@/lib/constants";
+import { HOME_FAQ_SCHEMA } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: { absolute: HOME_TITLE },
@@ -30,8 +32,13 @@ export default function HomePage() {
       <HowItWorks />
       <Pricing />
       <FAQ />
+      <TradesCrossLinks />
       <FinalCTA />
       <SiteFooter />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(HOME_FAQ_SCHEMA) }}
+      />
     </main>
   );
 }
