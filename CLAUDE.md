@@ -18,9 +18,13 @@ RingDesk is a done-for-you AI receptionist service for small businesses, especia
 
 - Single static landing page at ringdesk.co
 - 6 sections: Hero, Problem, How it works, Pricing, FAQ, Final CTA
+- Privacy and Terms pages with custom-drafted long-form policies (not Termly)
+- Technical SEO: `/robots.txt` (`src/app/robots.ts`), `/sitemap.xml` (`src/app/sitemap.ts`), JSON-LD structured data (LocalBusiness, Service x2, FAQPage) injected via `<script type="application/ld+json">` in the root layout
+- Per-page metadata with `title.template` (`%s | RingDesk`), Open Graph (1200x630), Twitter `summary_large_image`, page-level canonicals, robots + googlebot directives, and a separate `viewport` export
+- Audio sample gating via `NEXT_PUBLIC_AUDIO_SAMPLE_AVAILABLE` env var — hero audio player and the secondary "Hear it answer a call" button are omitted from the rendered HTML until Tony sets the var to `true` and drops the recording
+- Centralized constants, FAQ content, and schema in `src/lib/` so metadata, structured data, and rendered components share one source of truth
 - Stripe payment links embedded for $249 Standard / $499 Premium tiers (TBD — added in Block 4)
 - Calendly link for discovery calls
-- Privacy policy and terms pages
 
 ## What's NOT in Phase 1
 
@@ -40,8 +44,11 @@ These are Phase 2 problems triggered by customer #5 paying. Do not build them in
 - Next.js 15 (App Router)
 - TypeScript
 - Tailwind CSS v4
-- shadcn/ui components
-- Vercel deployment
+- `@tailwindcss/typography` plugin (drives the `prose prose-slate` styling on `/privacy` and `/terms`)
+- shadcn/ui components (button, card, accordion, separator)
+- Inter font via `next/font/google` with `display: swap`, exposed as `--font-inter`
+- JSON-LD structured data injected via `dangerouslySetInnerHTML` in the root layout
+- Vercel deployment (framework pinned via `vercel.json`)
 - Domain: ringdesk.co
 
 ## Brand assets
@@ -81,6 +88,18 @@ These are Phase 2 problems triggered by customer #5 paying. Do not build them in
 - All deployment via Vercel on `main` branch push
 - No local dev environment — all changes via PRs from GitHub web UI
 - SQL migrations as copy-paste (not applicable yet — no DB in Phase 1)
+- When architectural facts change, update both the relevant top-of-file section AND add a dated Recent Changes entry — top sections must reflect current state, not history
+
+### Extensibility patterns — where things live
+
+- **Site-wide constants** (URLs, phone, copy, OG paths): `src/lib/constants.ts`. Add new shared strings here so metadata, schema, and components don't drift.
+- **FAQ content**: `src/lib/faq.ts`. The visible `<FAQ>` component (`src/components/sections/faq.tsx`) and the `FAQPage` JSON-LD both consume this array — change questions/answers in one place.
+- **JSON-LD schema** (`@graph` with LocalBusiness, Service x2, FAQPage): `src/lib/schema.ts`. Pricing, area served, and the price-spec live here; injected once via the root layout.
+- **Legal page shell** (Privacy and Terms share it): `src/components/legal-page.tsx`. Wraps content in `prose prose-slate max-w-3xl mx-auto` with the logo header, `SiteFooter`, "← Back to home", and a cross-link to the other policy.
+- **Audio sample gating**: env var `NEXT_PUBLIC_AUDIO_SAMPLE_AVAILABLE` (must equal the literal string `"true"`); recording at `/public/audio/sample-call.mp3`. Logic in `src/components/sections/hero.tsx`.
+- **Brand color tokens**: CSS vars in `src/app/globals.css` (`--brand-slate`, `--brand-indigo`, `--brand-muted`, `--brand-bg-secondary`). Reference via `text-[color:var(--brand-slate)]` etc.
+- **SEO routes**: `src/app/robots.ts` and `src/app/sitemap.ts` use Next's `MetadataRoute.Robots` / `MetadataRoute.Sitemap` types; new public routes need a sitemap entry here.
+- **Vercel build**: pinned in `vercel.json` (`framework: nextjs`, `buildCommand`, `outputDirectory`, `installCommand`); do not let Vercel's dashboard auto-detect override.
 
 ## Recent Changes
 
@@ -91,3 +110,4 @@ These are Phase 2 problems triggered by customer #5 paying. Do not build them in
 - 2026-04-29: Footer copy trimmed — dropped "Built in Berthoud, Colorado." from `src/components/site-footer.tsx`. Footer now reads `© 2026 RingDesk. Privacy · Terms · tony@ringdesk.co` (links and email unchanged). Verified `Berthoud` no longer appears in any rendered HTML (`.next/server/app/{index,privacy,terms}.html`).
 - 2026-04-29: Technical SEO foundation: robots.txt, sitemap.xml, per-page metadata, JSON-LD schema (LocalBusiness, Service x2, FAQPage), heading hierarchy, performance optimizations. Generated `/robots.txt` via `src/app/robots.ts` (User-agent `*`, Allow `/`, Sitemap `https://ringdesk.co/sitemap.xml`) and `/sitemap.xml` via `src/app/sitemap.ts` (homepage priority 1.0 monthly, /privacy and /terms priority 0.3 yearly, ISO-8601 lastmod). Reworked root metadata in `src/app/layout.tsx` to use `metadataBase`, a `title.template` of `%s | RingDesk` with default `RingDesk — AI receptionist for trades in Northern Colorado`, the new long-form description focused on plumbers/HVAC/electricians/$249, full `robots`/`googleBot` directives (`max-image-preview: large`, `max-snippet: -1`), `openGraph` (type/locale/url/siteName/images 1200x630), and `twitter:summary_large_image`; added a separate `viewport` export (`width: device-width`, `initialScale: 1`, `maximumScale: 5`). Homepage (`src/app/page.tsx`) overrides title via `title.absolute` (`AI receptionist for trades in Northern Colorado | RingDesk`) so the template doesn't double up; `/privacy` and `/terms` get short titles, page-specific descriptions, page-level canonicals, and `robots: { index: true, follow: true }`. Centralized site copy + URLs in `src/lib/constants.ts` (SITE_URL, SITE_DESCRIPTION, HOME_TITLE, OG_IMAGE_PATH, RINGDESK_PHONE) so metadata and structured data share one source of truth. Extracted FAQ content to `src/lib/faq.ts` and refactored `src/components/sections/faq.tsx` to consume it. Added `src/lib/schema.ts` exporting a single `SITE_SCHEMA` `@graph` containing LocalBusiness (`@id #business`, Castle Pines address, +1-970-528-8725, areaServed Berthoud/Loveland/Fort Collins/Greeley/Longmont/Johnstown/Windsor + Colorado, priceRange `$249-$499`, image/logo URLs, sameAs []), Service `#service-standard` ($249/MON UnitPriceSpecification), Service `#service-premium` ($499/MON), and FAQPage built from the same `faqs` array. The schema is injected once via `<script type="application/ld+json">` at the end of `<body>` in the root layout (static, dangerouslySetInnerHTML with JSON.stringify). Heading hierarchy verified: exactly one `<h1>` per page (hero on `/`, page title on legal pages), `<h2>` per section, `<h3>` for tier names / step titles / legal subsections — no skips. All external links (Calendly, Stripe placeholders, processor deep links in `/privacy`) carry `target="_blank" rel="noopener noreferrer"`; same-origin self-references intentionally do not. No `<img>` tags exist (logo is a text wordmark) so there's nothing to migrate to `next/image`; Inter is loaded via `next/font/google` with `display: swap`. Verified locally: `next build` reports `/robots.txt` and `/sitemap.xml` as static routes alongside `/`, `/privacy`, `/terms`; `curl /robots.txt` and `/sitemap.xml` return the expected payloads; the homepage HTML contains a single `application/ld+json` block whose JSON parses cleanly with all four schema types and ID cross-references intact; per-page `<title>`, `<meta name="description">`, `<link rel="canonical">`, `<meta name="robots">`, `<meta name="googlebot">`, `viewport`, `og:*`, and `twitter:*` tags are all present and page-specific where they should be.
 - 2026-04-29: Hero polish + audio-sample gating. (1) Gated the hero audio player and the "Hear it answer a call" secondary button behind a build-time env var `NEXT_PUBLIC_AUDIO_SAMPLE_AVAILABLE`. With the var unset (default), both the audio card and the secondary button are completely omitted from the rendered HTML — only the primary "Book a 15-min call" CTA renders, so there's no dead button pointing at a missing file. ⚠️ ACTION REQUIRED for Tony when the Vapi recording is live: drop it at `/public/audio/sample-call.mp3`, set `NEXT_PUBLIC_AUDIO_SAMPLE_AVAILABLE=true` in Vercel project env vars, and redeploy — the audio card and the "Hear it answer a call" button will both appear, and the button anchor-scrolls to the player. Comment in `src/app/page.tsx` documents the toggle. (2) Added `scroll-smooth` to `<html>` in `src/app/layout.tsx` so the in-page anchor scroll feels good. (3) Increased hero breathing room — top padding bumped from `pt-20 sm:pt-28 lg:pt-32` to `pt-28 sm:pt-40 lg:pt-48` (~50% more), bottom padding `pb-24 lg:pb-32` → `pb-28 lg:pb-36`, headline → subheadline gap `mt-6` → `mt-10`, subheadline → CTAs gap `mt-10` → `mt-14`. Both build modes verified locally (`next build` with and without the env var); with the var off, `<audio>`, `Hear it answer`, and `sample-call` are all absent from `.next/server/app/index.html`.
+- 2026-04-29: CLAUDE.md cleanup — top-of-file authoritative sections updated to reflect current state. Recent Changes log preserved as-is. Going forward, every PR should update both the relevant top sections (if architectural facts change) AND add a dated changelog entry. Specifically: "What's in Phase 1" now lists the privacy/terms pages, technical SEO routes, JSON-LD schema, per-page metadata, audio-sample gating, and the centralized `src/lib/` source-of-truth pattern; "Tech stack" adds `@tailwindcss/typography`, the Inter font wiring, JSON-LD via `dangerouslySetInnerHTML`, and the `vercel.json` framework pin; "Conventions for Claude Code" adds an "Extensibility patterns" subsection mapping each shared concern (constants, FAQ data, schema, legal page shell, audio gating, brand tokens, SEO routes, Vercel build) to its file path so future PRs don't have to grep.
