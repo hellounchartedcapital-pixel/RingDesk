@@ -221,7 +221,7 @@ export default async function LocationPage({
                 rel="noopener noreferrer"
                 className="font-medium text-[color:var(--brand-indigo)] hover:underline"
               >
-                Talk to Tony →
+                {`${BOOKING_CTA_LABEL} →`}
               </Link>
             </figcaption>
           </figure>

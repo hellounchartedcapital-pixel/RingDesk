@@ -45,7 +45,7 @@ const plans: Plan[] = [
       "Weekly tuning sessions",
       "Priority response (4-hr SLA)",
       "Custom workflows + CRM integration",
-      "Quarterly strategy call with Tony",
+      "Quarterly strategy call with the founder",
       "Cancel anytime",
     ],
     cta: "Get Premium",
