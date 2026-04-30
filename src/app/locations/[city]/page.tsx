@@ -17,7 +17,7 @@ import {
   LOCATION_SLUGS,
   getLocation,
 } from "@/lib/locations";
-import { TRADES, TRADE_SLUGS } from "@/lib/trades";
+import { ACTIVE_TRADE_SLUGS, TRADES } from "@/lib/trades";
 import {
   buildBreadcrumbSchema,
   buildLocationBusinessSchema,
@@ -178,8 +178,9 @@ export default async function LocationPage({
             Built for trades in {location.displayName}
           </h2>
           <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-2">
-            {TRADE_SLUGS.map((tradeSlug) => {
+            {ACTIVE_TRADE_SLUGS.map((tradeSlug) => {
               const trade = TRADES[tradeSlug];
+              if (trade.comingSoon) return null;
               return (
                 <Link
                   key={tradeSlug}
@@ -192,7 +193,7 @@ export default async function LocationPage({
                         {trade.displayName}
                       </h3>
                       <p className="mt-3 text-base leading-relaxed text-[color:var(--brand-slate)]/80">
-                        {trade.heroSubheadline.split(".")[0]}.
+                        {trade.cardSummary}
                       </p>
                       <p className="mt-6 text-sm font-medium text-[color:var(--brand-indigo)]">
                         See {trade.displayName.toLowerCase()} page →

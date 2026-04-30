@@ -7,6 +7,9 @@ import { cn } from "@/lib/utils";
 import {
   BOOKING_CTA_LABEL,
   CALENDLY_URL,
+  PILOT_GEO,
+  PILOT_SLOT_BREAKDOWN,
+  PILOT_SLOTS_REMAINING,
   STRIPE_PREMIUM_URL,
   STRIPE_STANDARD_URL,
 } from "@/lib/constants";
@@ -57,10 +60,12 @@ export function Pricing() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-balance text-3xl font-bold tracking-tight text-[color:var(--brand-slate)] sm:text-4xl lg:text-5xl">
-            Simple pricing. No setup fee. Cancel anytime.
+            Done-for-you. Two tiers. Cancel anytime.
           </h2>
           <p className="mt-4 text-lg text-[color:var(--brand-muted)]">
-            First customer gets a free 30-day pilot — limited spots.
+            First customer gets a free 30-day pilot —{" "}
+            {PILOT_SLOTS_REMAINING} spots remaining: {PILOT_SLOT_BREAKDOWN}.{" "}
+            {PILOT_GEO} trades businesses.
           </p>
         </div>
 

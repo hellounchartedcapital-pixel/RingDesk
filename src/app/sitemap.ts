@@ -2,17 +2,22 @@ import type { MetadataRoute } from "next";
 
 import { SITE_URL } from "@/lib/constants";
 import { LOCATION_SLUGS } from "@/lib/locations";
-import { TRADE_SLUGS } from "@/lib/trades";
+import { ACTIVE_TRADE_SLUGS } from "@/lib/trades";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
 
-  const tradeRoutes: MetadataRoute.Sitemap = TRADE_SLUGS.map((slug) => ({
-    url: `${SITE_URL}/for/${slug}`,
-    lastModified,
-    changeFrequency: "monthly",
-    priority: 0.7,
-  }));
+  // Iterate ACTIVE_TRADE_SLUGS, not TRADE_SLUGS — coming-soon stubs are
+  // intentionally excluded from generateStaticParams in /for/[trade], so
+  // listing them here would point search engines at routes that 404.
+  const tradeRoutes: MetadataRoute.Sitemap = ACTIVE_TRADE_SLUGS.map(
+    (slug) => ({
+      url: `${SITE_URL}/for/${slug}`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    }),
+  );
 
   const locationRoutes: MetadataRoute.Sitemap = LOCATION_SLUGS.map(
     (slug) => ({

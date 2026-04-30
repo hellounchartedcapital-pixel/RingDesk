@@ -21,7 +21,7 @@ import {
 } from "@/lib/constants";
 import { LOCATIONS, LOCATION_SLUGS } from "@/lib/locations";
 import {
-  TRADE_SLUGS,
+  ACTIVE_TRADE_SLUGS,
   getOtherTrades,
   getTrade,
 } from "@/lib/trades";
@@ -33,7 +33,10 @@ import {
 type Params = { trade: string };
 
 export function generateStaticParams(): Params[] {
-  return TRADE_SLUGS.map((trade) => ({ trade }));
+  // Coming-soon trades are intentionally excluded so /for/[stub-slug]
+  // 404s rather than rendering an incomplete page. Stubs still surface
+  // on the homepage as non-link "Coming soon" cards.
+  return ACTIVE_TRADE_SLUGS.map((trade) => ({ trade }));
 }
 
 export async function generateMetadata({
@@ -43,7 +46,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { trade: slug } = await params;
   const trade = getTrade(slug);
-  if (!trade) return {};
+  if (!trade || trade.comingSoon) return {};
   const canonical = `${SITE_URL}/for/${trade.slug}`;
   return {
     title: { absolute: trade.metaTitle },
@@ -68,7 +71,8 @@ export default async function TradePage({
 }) {
   const { trade: slug } = await params;
   const trade = getTrade(slug);
-  if (!trade) notFound();
+  if (!trade || trade.comingSoon) notFound();
+  // After this guard, trade is narrowed to the full TradeContent variant.
 
   const otherTrades = getOtherTrades(slug);
   const canonical = `${SITE_URL}/for/${trade.slug}`;
