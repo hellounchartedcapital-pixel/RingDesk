@@ -24,13 +24,13 @@ export function Hero() {
       </div>
 
       <div className="mx-auto max-w-4xl px-6 pb-28 pt-28 text-center sm:pt-40 lg:pb-36 lg:pt-48">
-        <h1 className="text-balance text-5xl font-bold tracking-tight text-[color:var(--brand-slate)] sm:text-6xl lg:text-7xl">
+        <h1 className="text-balance text-4xl font-bold tracking-tight text-[color:var(--brand-slate)] sm:text-6xl lg:text-7xl">
           Stop missing $400 service calls.
         </h1>
         <p className="mx-auto mt-10 max-w-2xl text-balance text-lg leading-relaxed text-[color:var(--brand-muted)] sm:text-xl">
-          RingDesk is an AI receptionist installed and tuned by a real person.
-          We answer every call, qualify every lead, and text you the urgent
-          ones — so you stop losing jobs to whoever picks up first.
+          An AI receptionist that&rsquo;s actually installed for you. We
+          answer every call, qualify every lead, and text you the urgent
+          ones — so you stop losing jobs.
         </p>
 
         <div className="mt-14 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
