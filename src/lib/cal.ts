@@ -54,8 +54,15 @@ export type BookingFailure = {
 
 export type BookingResult = BookingSuccess | BookingFailure;
 
-type CalSlotEntry = { time: string };
+// Cal.com v2 returns each slot as { start: ISO } in current API versions and
+// { time: ISO } in older ones. Tolerate either; getSlotIso() picks whichever
+// is present.
+type CalSlotEntry = { start?: string; time?: string };
 type CalSlotsByDay = Record<string, CalSlotEntry[]>;
+
+function getSlotIso(slot: CalSlotEntry): string | undefined {
+  return slot.start ?? slot.time;
+}
 
 // Cal.com v2 returns either { status, data: Record<date, slots[]> } or
 // { status, data: { slots: Record<date, slots[]> } } depending on version —
@@ -159,7 +166,8 @@ function pickSlots(
   const futureByDay: { day: string; slots: string[] }[] = [];
   for (const day of sortedDays) {
     const filtered = (slotsByDay[day] ?? [])
-      .map((s) => s.time)
+      .map(getSlotIso)
+      .filter((t): t is string => typeof t === "string" && t.length > 0)
       .filter((t) => parseISO(t).getTime() >= cutoff)
       .sort();
     if (filtered.length > 0) futureByDay.push({ day, slots: filtered });
@@ -234,51 +242,14 @@ export async function getAvailableSlots(
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    console.warn("=== CAL.COM RAW RESPONSE (non-2xx) ===");
-    console.warn(`status: ${res.status}`);
-    console.warn(`body: ${text.slice(0, 2000)}`);
-    console.warn("=== END ===");
     throw new CalError(
       "API_ERROR",
       `Cal.com /slots returned ${res.status}: ${text.slice(0, 500)}`,
     );
   }
 
-  // DIAGNOSTIC: dump the raw Cal.com response so we can see what shape it
-  // actually has. Read the body as text first so we can both log it and
-  // still parse it safely afterward.
-  const rawText = await res.text();
-  console.log("=== CAL.COM RAW RESPONSE ===");
-  console.log(`status: ${res.status}`);
-  console.log(`url: ${url.toString()}`);
-  try {
-    const pretty = JSON.stringify(JSON.parse(rawText), null, 2);
-    console.log(`body (parsed):\n${pretty}`);
-  } catch {
-    console.log(`body (raw, not JSON):\n${rawText.slice(0, 4000)}`);
-  }
-  console.log("=== END ===");
-
-  let payload: CalSlotsResponse;
-  try {
-    payload = JSON.parse(rawText) as CalSlotsResponse;
-  } catch (err) {
-    throw new CalError(
-      "API_ERROR",
-      `Cal.com /slots returned non-JSON body: ${err instanceof Error ? err.message : String(err)}`,
-    );
-  }
-
-  let slotsByDay: CalSlotsByDay;
-  try {
-    slotsByDay = extractSlotsByDay(payload);
-  } catch (err) {
-    console.error("=== PARSE FAILURE in extractSlotsByDay ===");
-    console.error(err);
-    console.error("payload was:", JSON.stringify(payload).slice(0, 2000));
-    console.error("=== END ===");
-    throw err;
-  }
+  const payload = (await res.json()) as CalSlotsResponse;
+  const slotsByDay = extractSlotsByDay(payload);
 
   if (!slotsByDay || Object.keys(slotsByDay).length === 0) {
     throw new CalError(
@@ -287,26 +258,7 @@ export async function getAvailableSlots(
     );
   }
 
-  let picked: { iso: string[]; rawSlots: string[] };
-  try {
-    picked = pickSlots(slotsByDay, now);
-  } catch (err) {
-    console.error("=== PARSE FAILURE in pickSlots ===");
-    console.error(err);
-    console.error(
-      "slotsByDay days:",
-      Object.keys(slotsByDay).slice(0, 20).join(", "),
-    );
-    console.error(
-      "first day's slots sample:",
-      JSON.stringify(
-        slotsByDay[Object.keys(slotsByDay)[0]]?.slice(0, 3) ?? null,
-      ),
-    );
-    console.error("=== END ===");
-    throw err;
-  }
-
+  const picked = pickSlots(slotsByDay, now);
   if (picked.iso.length === 0) {
     throw new CalError(
       "NO_AVAILABILITY",
@@ -314,19 +266,8 @@ export async function getAvailableSlots(
     );
   }
 
-  let formatted: SlotOption[];
-  try {
-    formatted = picked.iso.map(formatSlot);
-  } catch (err) {
-    console.error("=== PARSE FAILURE in formatSlot ===");
-    console.error(err);
-    console.error("picked.iso was:", JSON.stringify(picked.iso));
-    console.error("=== END ===");
-    throw err;
-  }
-
   return {
-    slots: formatted,
+    slots: picked.iso.map(formatSlot),
     rawSlots: picked.rawSlots,
   };
 }
