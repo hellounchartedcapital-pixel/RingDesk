@@ -54,17 +54,31 @@ export function Hero() {
             id="sample-call"
             className="mx-auto mt-16 max-w-xl scroll-mt-24 p-6 text-left"
           >
-            <p className="text-sm font-medium text-[color:var(--brand-slate)]">
-              Sample call: a plumber&rsquo;s customer asking about an emergency
+            <span className="inline-flex items-center rounded-full bg-[color:var(--brand-bg-secondary)] px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[color:var(--brand-indigo)]">
+              Demo
+            </span>
+            <p className="mt-3 text-base font-semibold leading-snug text-[color:var(--brand-slate)]">
+              AI receptionist for a Northern Colorado trades business
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-[color:var(--brand-muted)]">
+              What an installed RingDesk receptionist sounds like handling a
+              customer call end-to-end — water heater leak, urgency triage,
+              same-day service booking, full details captured with
+              confirmation readback. About 2 min, unedited.
             </p>
             <audio
               controls
               preload="none"
               src="/audio/sample-call.mp3"
-              className="mt-4 w-full"
+              className="mt-5 w-full"
             >
               Your browser does not support the audio element.
             </audio>
+            <p className="mt-3 text-xs leading-relaxed text-[color:var(--brand-muted)]">
+              Crestline Plumbing is a fictional demo business. Your installed
+              receptionist is configured for your specific business, service
+              area, and call types.
+            </p>
           </Card>
         ) : null}
       </div>
