@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 // Hero audio sample (Vapi recording) is gated by the build-time env var
 // NEXT_PUBLIC_AUDIO_SAMPLE_AVAILABLE. While unset (or any value other than
 // the literal string "true") the audio player card and the secondary
-// "Hear it answer a call" button are hidden — only the primary Calendly
+// "Hear it answer a call" button are hidden — only the primary booking
 // CTA renders. To enable: drop the recording at /public/audio/sample-call.mp3,
 // set NEXT_PUBLIC_AUDIO_SAMPLE_AVAILABLE=true in Vercel project env vars,
 // and redeploy.

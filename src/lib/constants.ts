@@ -13,8 +13,10 @@ export const OG_IMAGE_ALT = "RingDesk — AI receptionist for trades";
 
 export const RINGDESK_PHONE = "+1-970-528-8725";
 
-export const CALENDLY_URL =
-  "https://calendly.com/tony-ringdesk/ringdesk-discovery-call";
+// Booking URL — historically Calendly, now Cal.com (event type ai-discovery,
+// 15 min). Symbol name kept as CALENDLY_URL so importers don't have to change.
+// The Vapi assistant also uses this URL as the human fallback when handing off.
+export const CALENDLY_URL = "https://cal.com/ringdesk/ai-discovery";
 
 export const STRIPE_STANDARD_URL =
   "https://buy.stripe.com/cNicN79cp8yQe8ibT104800";
