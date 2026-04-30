@@ -16,7 +16,7 @@ const PROCESSORS: { name: string; href: string }[] = [
   { name: "Vapi", href: "https://vapi.ai/privacy" },
   { name: "Anthropic", href: "https://www.anthropic.com/legal/privacy" },
   { name: "Google Workspace", href: "https://policies.google.com/privacy" },
-  { name: "Calendly", href: "https://calendly.com/privacy" },
+  { name: "Cal.com", href: "https://cal.com/privacy" },
 ];
 
 const PROCESSOR_DESCRIPTIONS: Record<string, string> = {
@@ -26,7 +26,7 @@ const PROCESSOR_DESCRIPTIONS: Record<string, string> = {
   Vapi: "(voice AI infrastructure)",
   Anthropic: "(AI language model used by the receptionist)",
   "Google Workspace": "(email, calendar)",
-  Calendly: "(call scheduling)",
+  "Cal.com": "(discovery-call scheduling)",
 };
 
 export default function PrivacyPage() {
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
     <LegalPage crossLink={{ href: "/terms", label: "Terms of Service →" }}>
       <h1>Privacy Policy</h1>
       <p>
-        <strong>Last updated: April 29, 2026</strong>
+        <strong>Last updated: April 30, 2026</strong>
       </p>
 
       <p>
