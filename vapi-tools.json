@@ -1,0 +1,72 @@
+{
+  "$comment": "Paste these into the Vapi dashboard → Tools tab. The serverUrl values point at the Vercel production deployment of ringdesk.co. async=false because the AI must wait for the response before continuing the conversation. After saving each tool, attach both to the assistant 53ca6567-707b-46bf-bfd7-cc80abcb9fb7.",
+  "tools": [
+    {
+      "type": "function",
+      "async": false,
+      "server": {
+        "url": "https://ringdesk.co/api/cal/availability",
+        "method": "POST",
+        "timeoutSeconds": 20
+      },
+      "function": {
+        "name": "check_availability",
+        "description": "Use when the caller wants to schedule a discovery call or demo with Tony at RingDesk. Returns up to 8 available 15-minute slots over the next 7 days. Each slot has a `spoken` field you can read aloud verbatim (e.g. 'Tomorrow at 9 AM Mountain'). Only invoke this for prospects who are interested in RingDesk's service — never for existing customers calling about their account, vendors, or wrong numbers. After receiving slots, do NOT list all 8 — offer 2 or 3 and ask the caller if any of those work, then offer the next batch if needed.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "daysAhead": {
+              "type": "number",
+              "description": "How many days ahead to check (default 7, max 14). Leave default unless the caller asks for a specific date range.",
+              "minimum": 1,
+              "maximum": 14
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "function",
+      "async": false,
+      "server": {
+        "url": "https://ringdesk.co/api/cal/book",
+        "method": "POST",
+        "timeoutSeconds": 25
+      },
+      "function": {
+        "name": "book_appointment",
+        "description": "Use after the caller has chosen a specific slot from check_availability AND you have collected their name, business name, and phone number (email is optional — pass null if they refuse). Books the 15-minute discovery call on Tony's Cal.com calendar. If the response indicates SLOT_TAKEN, apologize, immediately call check_availability again, and offer the next available slot. On success, read the confirmation script: 'Great — I've got you booked for [confirmedTimeSpoken]. You'll get a confirmation email and text shortly.'",
+        "parameters": {
+          "type": "object",
+          "required": ["startTimeIso", "name", "phone", "businessName"],
+          "properties": {
+            "startTimeIso": {
+              "type": "string",
+              "description": "ISO 8601 UTC timestamp of the chosen slot — copy the `iso` field from the slot the caller picked in check_availability. Do NOT improvise or modify this value."
+            },
+            "name": {
+              "type": "string",
+              "description": "Caller's full name (first and last if given)."
+            },
+            "email": {
+              "type": "string",
+              "description": "Caller's email address. Pass null if the caller declines to give one — we'll synthesize a placeholder."
+            },
+            "phone": {
+              "type": "string",
+              "description": "Caller's phone number in E.164 format (e.g. +19705551234). If the caller gives it in another format, normalize to E.164."
+            },
+            "businessName": {
+              "type": "string",
+              "description": "The caller's business name (the trades business they own or work for)."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Optional — one short sentence on why they want to talk (e.g. 'wants pricing for a 2-tech plumbing company in Loveland'). Pass empty string if the caller didn't say."
+            }
+          }
+        }
+      }
+    }
+  ]
+}
