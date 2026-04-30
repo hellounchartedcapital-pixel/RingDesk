@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 import {
@@ -111,6 +112,7 @@ export default function RootLayout({
           // Static structured data — does not change per-render.
           dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_SCHEMA) }}
         />
+        <Analytics />
       </body>
     </html>
   );
