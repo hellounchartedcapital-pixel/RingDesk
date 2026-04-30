@@ -207,7 +207,7 @@ export default async function TradePage({
                 rel="noopener noreferrer"
                 className="font-medium text-[color:var(--brand-indigo)] hover:underline"
               >
-                Talk to Tony →
+                {`${BOOKING_CTA_LABEL} →`}
               </Link>
             </figcaption>
           </figure>

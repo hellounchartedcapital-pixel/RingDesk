@@ -16,13 +16,13 @@ const ROWS: Row[] = [
     attribute: "Setup",
     diy: "You build it (10-30 hrs)",
     human: "Vendor configures it",
-    ringdesk: "Tony installs it for you in 48 hours",
+    ringdesk: "We install it for you in 48 hours",
   },
   {
     attribute: "Tuning",
     diy: "You manage prompts and call flows",
     human: "Vendor charges hourly for changes",
-    ringdesk: "Tony tunes it weekly based on real calls",
+    ringdesk: "Weekly tuning based on real calls",
   },
   {
     attribute: "Per-call cost",
@@ -40,7 +40,7 @@ const ROWS: Row[] = [
     attribute: "Quality control",
     diy: "You catch the mistakes",
     human: "Outsourced to call center reps",
-    ringdesk: "Tony listens to actual calls weekly",
+    ringdesk: "We listen to actual calls weekly",
   },
   {
     attribute: "Spanish handling",
