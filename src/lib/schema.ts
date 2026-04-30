@@ -125,6 +125,32 @@ export function buildTradePageSchema(items: FAQ[]) {
   };
 }
 
+// `url` is optional so intermediate breadcrumbs without a real index
+// page (e.g. "Locations" between Home and a city slug) can still appear
+// in the trail by name only — schema.org allows this and Google parses it.
+export type BreadcrumbItem = { name: string; url?: string };
+
+export function buildBreadcrumbSchema(items: BreadcrumbItem[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => {
+      const entry: {
+        "@type": "ListItem";
+        position: number;
+        name: string;
+        item?: string;
+      } = {
+        "@type": "ListItem",
+        position: index + 1,
+        name: item.name,
+      };
+      if (item.url) entry.item = item.url;
+      return entry;
+    }),
+  };
+}
+
 export function buildLocationBusinessSchema({
   slug,
   city,

@@ -27,7 +27,7 @@ export function Problem() {
           {stats.map((stat) => (
             <Card
               key={stat.headline}
-              className="border-white/10 bg-white/5 text-white"
+              className="border-white/20 bg-white/10 text-white"
             >
               <CardContent className="p-8 pt-8">
                 <p className="text-2xl font-bold tracking-tight text-white">

@@ -7,13 +7,21 @@ import { CallCTA } from "@/components/call-cta";
 import { Card, CardContent } from "@/components/ui/card";
 import { SiteLogo } from "@/components/site-logo";
 import { SiteFooter } from "@/components/site-footer";
-import { CALENDLY_URL, CONTACT_EMAIL, SITE_URL } from "@/lib/constants";
+import {
+  BOOKING_CTA_LABEL,
+  CALENDLY_URL,
+  CONTACT_EMAIL,
+  SITE_URL,
+} from "@/lib/constants";
 import {
   LOCATION_SLUGS,
   getLocation,
 } from "@/lib/locations";
 import { TRADES, TRADE_SLUGS } from "@/lib/trades";
-import { buildLocationBusinessSchema } from "@/lib/schema";
+import {
+  buildBreadcrumbSchema,
+  buildLocationBusinessSchema,
+} from "@/lib/schema";
 
 type Params = { city: string };
 
@@ -61,6 +69,11 @@ export default async function LocationPage({
     city: location.displayName,
     url: canonical,
   });
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: "Home", url: SITE_URL },
+    { name: "Locations" }, // no /locations index page; name-only is valid
+    { name: location.displayName, url: canonical },
+  ]);
 
   return (
     <main className="min-h-screen bg-white">
@@ -73,7 +86,7 @@ export default async function LocationPage({
           rel="noopener noreferrer"
           className="text-sm font-medium text-[color:var(--brand-slate)] hover:text-[color:var(--brand-indigo)]"
         >
-          Book a call
+          {BOOKING_CTA_LABEL}
         </Link>
       </div>
 
@@ -98,7 +111,7 @@ export default async function LocationPage({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Book a 15-min call
+                {BOOKING_CTA_LABEL}
               </Link>
             </Button>
             <Button size="xl" variant="outline" asChild>
@@ -232,7 +245,7 @@ export default async function LocationPage({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Book a 15-min call
+                {BOOKING_CTA_LABEL}
               </Link>
             </Button>
           </div>
@@ -256,6 +269,13 @@ export default async function LocationPage({
         type="application/ld+json"
         // Location-scoped LocalBusiness; static per route.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+      <script
+        type="application/ld+json"
+        // BreadcrumbList: Home › Locations › [City].
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema),
+        }}
       />
     </main>
   );
