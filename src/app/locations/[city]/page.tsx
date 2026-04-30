@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { CallCTA } from "@/components/call-cta";
 import { Card, CardContent } from "@/components/ui/card";
 import { SiteLogo } from "@/components/site-logo";
 import { SiteFooter } from "@/components/site-footer";
@@ -104,6 +105,7 @@ export default async function LocationPage({
               <Link href="/#pricing">See pricing</Link>
             </Button>
           </div>
+          <CallCTA tone="light" />
         </div>
       </section>
 
@@ -234,6 +236,7 @@ export default async function LocationPage({
               </Link>
             </Button>
           </div>
+          <CallCTA tone="dark" />
           <p className="mt-6 text-sm text-[color:var(--brand-muted)]">
             Or email{" "}
             <a

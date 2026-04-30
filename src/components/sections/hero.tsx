@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { CallCTA } from "@/components/call-cta";
 import { Card } from "@/components/ui/card";
 import { SiteLogo } from "@/components/site-logo";
 import { CALENDLY_URL } from "@/lib/constants";
@@ -48,6 +49,8 @@ export function Hero() {
             </Button>
           ) : null}
         </div>
+
+        <CallCTA tone="light" />
 
         {audioSampleAvailable ? (
           <Card

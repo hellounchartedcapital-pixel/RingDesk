@@ -13,6 +13,11 @@ export const OG_IMAGE_ALT = "RingDesk — AI receptionist for trades";
 
 export const RINGDESK_PHONE = "+1-970-528-8725";
 
+// Variants of the phone number for UI use. Keep these in sync with
+// RINGDESK_PHONE above (which is the JSON-LD canonical form).
+export const RINGDESK_PHONE_TEL = "+19705288725"; // for tel: hrefs
+export const RINGDESK_PHONE_DISPLAY = "(970) 528-8725"; // for visible text
+
 // Booking URL — historically Calendly, now Cal.com (event type ai-discovery,
 // 15 min). Symbol name kept as CALENDLY_URL so importers don't have to change.
 // The Vapi assistant also uses this URL as the human fallback when handing off.
