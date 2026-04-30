@@ -10,6 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { CallCTA } from "@/components/call-cta";
 import { SiteLogo } from "@/components/site-logo";
 import { SiteFooter } from "@/components/site-footer";
 import { CALENDLY_URL, CONTACT_EMAIL, SITE_URL } from "@/lib/constants";
@@ -104,6 +105,7 @@ export default async function TradePage({
               <Link href="/#pricing">See pricing</Link>
             </Button>
           </div>
+          <CallCTA tone="light" />
         </div>
       </section>
 
@@ -235,6 +237,7 @@ export default async function TradePage({
               </Link>
             </Button>
           </div>
+          <CallCTA tone="dark" />
           <p className="mt-6 text-sm text-[color:var(--brand-muted)]">
             Or email{" "}
             <a

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { CallCTA } from "@/components/call-cta";
 import { CALENDLY_URL, CONTACT_EMAIL } from "@/lib/constants";
 
 export function FinalCTA() {
@@ -25,6 +26,8 @@ export function FinalCTA() {
             </Link>
           </Button>
         </div>
+
+        <CallCTA tone="dark" />
 
         <p className="mt-6 text-sm text-[color:var(--brand-muted)]">
           Or email{" "}
