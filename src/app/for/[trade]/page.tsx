@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -169,9 +170,9 @@ export default async function TradePage({
                 key={callType}
                 className="flex items-start gap-3 text-base text-[color:var(--brand-slate)]"
               >
-                <span
+                <Check
+                  className="mt-1 h-4 w-4 shrink-0 text-[color:var(--brand-indigo)]"
                   aria-hidden
-                  className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--brand-indigo)]"
                 />
                 <span>{callType}</span>
               </li>
