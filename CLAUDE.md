@@ -16,16 +16,17 @@ RingDesk is a done-for-you AI receptionist service for small businesses, especia
 
 ## What's in Phase 1 (this codebase)
 
-- Single static landing page at ringdesk.co
+- Static landing page at ringdesk.co
 - 6 sections: Hero, Problem, How it works, Pricing, FAQ, Final CTA
 - Privacy and Terms pages with custom-drafted long-form policies (not Termly)
 - Programmatic content pages — trade vertical pages at `/for/[trade]` and location pages at `/locations/[city]`, generated from content data files. Currently includes: plumbers, hvac, loveland, fort-collins.
 - Technical SEO: `/robots.txt` (`src/app/robots.ts`), `/sitemap.xml` (`src/app/sitemap.ts` — auto-includes every trade and location route), sitewide JSON-LD `LocalBusiness` + 2x `Service` injected via the root layout, plus page-level FAQPage on the homepage and each trade page, plus a location-scoped LocalBusiness on each location page
 - Per-page metadata with `title.template` (`%s | RingDesk`), Open Graph (1200x630), Twitter `summary_large_image`, page-level canonicals, robots + googlebot directives, and a separate `viewport` export
 - Audio sample gating via `NEXT_PUBLIC_AUDIO_SAMPLE_AVAILABLE` env var — hero audio player and the secondary "Hear it answer a call" button are omitted from the rendered HTML until Tony sets the var to `true` and drops the recording
+- Cal.com booking integration for the Vapi AI receptionist — two Vercel API routes (`/api/cal/availability`, `/api/cal/book`) backed by typed helpers in `src/lib/cal.ts`. The Vapi assistant on (970) 528-8725 calls these mid-conversation to surface and book 15-minute discovery slots. See the dedicated "Cal.com Integration" section below.
 - Centralized constants, FAQ content, trade/location content, and schema in `src/lib/` so metadata, structured data, and rendered components share one source of truth
 - Stripe payment links embedded for $249 Standard / $499 Premium tiers
-- Calendly link for discovery calls
+- Calendly link for discovery calls (still wired into the landing-page CTAs; will be swapped to the Cal.com booking link after the Vapi integration is verified end-to-end)
 
 ## What's NOT in Phase 1
 
@@ -49,6 +50,8 @@ These are Phase 2 problems triggered by customer #5 paying. Do not build them in
 - shadcn/ui components (button, card, accordion, separator)
 - Inter font via `next/font/google` with `display: swap`, exposed as `--font-inter`
 - JSON-LD structured data injected via `dangerouslySetInnerHTML` in the root layout
+- `date-fns` + `date-fns-tz` for slot formatting in `America/Denver` (used by the Cal.com integration)
+- Vercel API routes under `src/app/api/cal/*` (Node runtime) — first server-side surface in the project; pattern is "typed helper in `src/lib/<integration>.ts` → thin Vercel route → external tool definition"
 - Vercel deployment (framework pinned via `vercel.json`)
 - Domain: ringdesk.co
 
@@ -67,7 +70,8 @@ These are Phase 2 problems triggered by customer #5 paying. Do not build them in
 
 ## External links
 
-- **Calendly (primary CTA):** https://calendly.com/tony-ringdesk/ringdesk-discovery-call
+- **Calendly (current landing-page CTA):** https://calendly.com/tony-ringdesk/ringdesk-discovery-call — still the booking destination on `/`, `/for/[trade]`, `/locations/[city]`. Slated to be swapped to the Cal.com link below once the Vapi integration is verified end-to-end.
+- **Cal.com (AI receptionist booking):** https://cal.com/ringdesk/ai-discovery — public booking URL for the `ai-discovery` event type (15 min). The Vapi assistant books against this event via `/api/cal/*`; the URL is also the human fallback when the AI hands off ("let me text you the link").
 - **Email:** tony@ringdesk.co (primary), hello@ringdesk.co (general)
 - **Stripe Standard ($249) payment link:** ✅ live — https://buy.stripe.com/cNicN79cp8yQe8ibT104800
 - **Stripe Premium ($499) payment link:** ✅ live — https://buy.stripe.com/dRm00l60d7uM3tE2ir04801
@@ -103,6 +107,66 @@ These are Phase 2 problems triggered by customer #5 paying. Do not build them in
 - **Brand color tokens**: CSS vars in `src/app/globals.css` (`--brand-slate`, `--brand-indigo`, `--brand-muted`, `--brand-bg-secondary`). Reference via `text-[color:var(--brand-slate)]` etc.
 - **SEO routes**: `src/app/robots.ts` and `src/app/sitemap.ts` use Next's `MetadataRoute.Robots` / `MetadataRoute.Sitemap` types; trade and location routes are added automatically by iterating `TRADE_SLUGS` and `LOCATION_SLUGS`. New top-level routes (e.g. a future `/about`) need a hand-added entry here.
 - **Vercel build**: pinned in `vercel.json` (`framework: nextjs`, `buildCommand`, `outputDirectory`, `installCommand`); do not let Vercel's dashboard auto-detect override.
+- **External tool integrations** (e.g. Cal.com today, future field-service-software in Phase 2): typed helper module at `src/lib/<integration>.ts` exporting strongly-typed functions and a `*Error` class; thin Vercel route(s) at `src/app/api/<integration>/<action>/route.ts` that translate between JSON HTTP and the helper; tool definitions for the consuming agent (Vapi today) shipped as a JSON file at the repo root for paste-into-dashboard. Keep the `*Error` codes (`SLOT_TAKEN`, `INVALID_INPUT`, `API_ERROR`, `UNKNOWN`, plus integration-specific ones like `NO_AVAILABILITY`) consistent so prompts can branch on them deterministically.
+
+## Cal.com Integration
+
+The Vapi AI receptionist (assistant `53ca6567-707b-46bf-bfd7-cc80abcb9fb7` on (970) 528-8725) books 15-minute discovery calls with Tony directly via Cal.com mid-conversation, instead of handing off to a human or texting a link.
+
+### Account
+
+- **Cal.com username:** `ringdesk`
+- **Event type slug:** `ai-discovery` (15 min, location = "Attendee phone number" — Tony calls them)
+- **Public booking URL:** https://cal.com/ringdesk/ai-discovery
+- **Required attendee fields:** Name, Email, Attendee phone number, Business Name
+- **Optional attendee field:** "What's the main reason for the call?" (Long Text, identifier `reason`)
+
+### Env vars (Vercel — Production + Preview + Development)
+
+- `CAL_API_KEY` — Cal.com v2 API key (Bearer token)
+- `CAL_USERNAME` — `ringdesk`
+- `CAL_EVENT_SLUG` — `ai-discovery`
+
+`CAL_USERNAME` and `CAL_EVENT_SLUG` have safe defaults in code so a missing env var won't break in dev; `CAL_API_KEY` is required and the helpers throw a clear `CalError("API_ERROR", …)` if it's not set.
+
+### API routes
+
+Both routes are under `src/app/api/cal/`, return JSON, and accept `OPTIONS` preflight + `POST`. Both include permissive CORS headers (`Access-Control-Allow-Origin: *`) — Vapi calls them server-to-server, so CORS isn't actually needed today, but the headers are cheap and let Tony test from any origin.
+
+**`POST /api/cal/availability`** — surface the next 8 slots for the AI to read aloud.
+
+- Request: `{ daysAhead?: number }` (default `7`, clamped to `[1, 14]`)
+- Success (200): `{ success: true, slots: SlotOption[] }` where `SlotOption` is `{ iso, spoken, date, time }` — `spoken` is the read-aloud string ("Tomorrow at 9 AM Mountain"), always in `America/Denver`.
+- No availability (200): `{ success: false, errorCode: "NO_AVAILABILITY", message, slots: [] }` — 200 because it's an expected outcome the AI can speak to, not a server failure.
+- Cal.com error (502) or other (500): `{ success: false, errorCode: "API_ERROR" | …, message }`.
+- Slot distribution: 2 evenly-spread slots from each of the next 4 days with availability, then backfill from later days; minimum 2-hour notice from `now`.
+
+**`POST /api/cal/book`** — create a booking on Cal.com.
+
+- Request: `{ startTimeIso, name, phone, businessName, email?, reason? }`
+- Required fields: `startTimeIso`, `name`, `phone`, `businessName` — missing any returns 400 `INVALID_INPUT`.
+- Synth-email workaround: if `email` is `null`, empty, or one of the sentinels (`no-email-provided`, `none`, case-insensitive), it's replaced with `noemail-<digits>@ringdesk-noemail.local` and the substitution is logged. Cal.com's required-email validation can't be turned off on this event type.
+- Success (200): `{ success: true, bookingUid, confirmedTimeSpoken, message }`.
+- Failure: `{ success: false, errorCode, message }` with HTTP 409 (`SLOT_TAKEN`), 400 (`INVALID_INPUT`), 502 (`API_ERROR`), or 500 (`UNKNOWN`).
+- Phone numbers are masked in logs (last 4 digits only).
+
+The typed surface (and the response-shape parsing for both Cal.com v2 response variants) lives in `src/lib/cal.ts` — extend the integration there, not in the route handlers.
+
+### Vapi tools
+
+The two Vapi function tools (`check_availability`, `book_appointment`) live as JSON in `vapi-tools.json` at the repo root. They're not wired programmatically — Tony pastes them into Vapi → Tools and attaches both to the assistant. Tool descriptions prime the agent on **when** to invoke each (prospect bucket only — never customer/vendor/wrong-number) and on the read-aloud rules (offer 2–3 slots, not all 8).
+
+### System prompt addendum
+
+`vapi-system-prompt-addendum.md` at the repo root contains the booking-flow paragraphs to append to the existing 1,600-word Vapi system prompt. It covers when to invoke the tools, slot read-aloud rules, the three-strike indecision fallback (offer slots → narrow by morning/afternoon → text the booking link → human handoff), `SLOT_TAKEN` recovery, email-refusal handling (proceed with `null`), and the confirmation script.
+
+### End-to-end test
+
+`scripts/test-cal-endpoints.sh` (executable) runs four smoke tests against `BASE_URL` (defaults to https://ringdesk.co): list slots, book the first slot, re-book it (expect `SLOT_TAKEN`), and book a second slot with `email: null` (synth-email path). `DRY_RUN=1` skips the booking writes.
+
+### Phase 2 known constraint
+
+Cal.com is for **Tony's discovery calls only**. When a customer's AI receptionist (e.g. for a plumbing company) needs to book a service appointment for **their** customers, that requires a field-service-software integration (Housecall Pro, Jobber, ServiceTitan), not Cal.com. The Vapi system prompt already routes service-appointment requests away from these tools.
 
 ## Recent Changes
 
@@ -116,3 +180,4 @@ These are Phase 2 problems triggered by customer #5 paying. Do not build them in
 - 2026-04-29: CLAUDE.md cleanup — top-of-file authoritative sections updated to reflect current state. Recent Changes log preserved as-is. Going forward, every PR should update both the relevant top sections (if architectural facts change) AND add a dated changelog entry. Specifically: "What's in Phase 1" now lists the privacy/terms pages, technical SEO routes, JSON-LD schema, per-page metadata, audio-sample gating, and the centralized `src/lib/` source-of-truth pattern; "Tech stack" adds `@tailwindcss/typography`, the Inter font wiring, JSON-LD via `dangerouslySetInnerHTML`, and the `vercel.json` framework pin; "Conventions for Claude Code" adds an "Extensibility patterns" subsection mapping each shared concern (constants, FAQ data, schema, legal page shell, audio gating, brand tokens, SEO routes, Vercel build) to its file path so future PRs don't have to grep.
 - 2026-04-29: SEO Layer 3 launched — programmatic content pages for trade verticals (`/for/plumbers`, `/for/hvac`) and locations (`/locations/loveland`, `/locations/fort-collins`) with reusable templates. Sitemap now includes 7 URLs (was 3). New content data files: `src/lib/trades.ts` (TradeContent + TRADES record with hero copy, three value props, common call types, avg job value text, testimonial placeholder, four trade-specific FAQs, metaTitle/metaDescription) and `src/lib/locations.ts` (LocationContent + LOCATIONS record with displayName, fullName, region, population, nearbyAreas, localContext prose, whyTradesHere prose, localKeywords, testimonialPlaceholder, metaTitle/metaDescription). Adding a new trade or location is now a single-file edit (add an entry to the relevant record); `/for/[slug]` / `/locations/[slug]` routes, sitemap entries, homepage cross-link cards, and JSON-LD all update automatically. Each page has unique `title` (via `title.absolute`), `description`, `canonical`, `og:url`, and `twitter` overrides. Each trade page injects its own FAQPage JSON-LD via `buildTradePageSchema(trade.faqs)`; each location page injects a location-scoped LocalBusiness via `buildLocationBusinessSchema({slug, city, url})` with `parentOrganization` `@id` ref to the master `#business`. Refactored `SITE_SCHEMA` to drop FAQPage from the layout-level @graph (so it doesn't show up on pages that don't render the FAQ — Google's guidance) and added `HOME_FAQ_SCHEMA` injected from the homepage. Homepage now has a `RingDesk for your trade` section above the footer (`src/components/sections/trades-cross-links.tsx`) with cards linking to each trade page. Added `id="pricing"` and `id="how-it-works"` (with `scroll-mt-24`) to the homepage Pricing and How-it-works sections so the trade/location page CTAs that link to `/#pricing` and `/#how-it-works` land cleanly. Trade-page final CTA cross-links to other trade pages; location pages cross-link to all trade pages. Both new dynamic routes use `generateStaticParams` + `dynamicParams = false` so they're fully statically prerendered and any unknown slug 404s. Verified locally: `next build` shows 9 prerendered pages (`/`, `/privacy`, `/terms`, `/for/plumbers`, `/for/hvac`, `/locations/loveland`, `/locations/fort-collins`, `/robots.txt`, `/sitemap.xml`); `next lint` clean; `curl /sitemap.xml` returns all 7 content URLs; per-page audit shows trade pages have a unique 4-question FAQPage and location pages have a city-scoped LocalBusiness, with no duplicated FAQPage on pages that don't render the FAQ.
 - 2026-04-29: Stripe payment links wired in — Standard ($249/mo) and Premium ($499/mo) live. Pricing CTAs on homepage and trade pages now go directly to Stripe Checkout. ACTION REQUIRED #3 (Stripe payment URLs) is now resolved. `STRIPE_STANDARD_URL` (`https://buy.stripe.com/cNicN79cp8yQe8ibT104800`) and `STRIPE_PREMIUM_URL` (`https://buy.stripe.com/dRm00l60d7uM3tE2ir04801`) replace the prior Calendly fallbacks in `src/lib/constants.ts`. The homepage Pricing section's "Get Standard" / "Get Premium" buttons render the new URLs (verified by grepping `.next/server/app/index.html`). Trade pages (`/for/plumbers`, `/for/hvac`) don't render Stripe links directly — their "See pricing" CTA anchor-scrolls to `/#pricing`, where the live links live — so they remain unchanged. "What's in Phase 1" now drops the "(TBD — added in Block 4)" qualifier on the Stripe bullet, and "External links" lists both URLs as ✅ live.
+- 2026-04-30: Added Cal.com booking integration. Two API routes (`/api/cal/availability`, `/api/cal/book`) wired to Cal.com v2 API via `src/lib/cal.ts`. Vapi tools to be added manually via dashboard using `vapi-tools.json`. System prompt addendum at `vapi-system-prompt-addendum.md`. New typed surface in `src/lib/cal.ts` exports `getAvailableSlots(daysAhead)` and `bookSlot(params)` plus a `CalError` class with `NO_AVAILABILITY`/`API_ERROR`/`SLOT_TAKEN`/`INVALID_INPUT`/`UNKNOWN` codes; slots are formatted in `America/Denver` via `date-fns-tz` and returned with `iso`/`spoken`/`date`/`time` fields so the AI can read them aloud verbatim. Slot distribution: 2 evenly-spread slots from each of the next 4 days with availability, then backfill from later days; 2-hour minimum notice. Synth-email workaround handles caller refusal (`email: null` → `noemail-<digits>@ringdesk-noemail.local`). Routes return permissive CORS, log a sanitized request shape (phone last-4 only), and translate `CalError` codes to HTTP statuses (`SLOT_TAKEN`→409, `INVALID_INPUT`→400, `API_ERROR`→502). `vapi-tools.json` ships the two Vapi function tool definitions (`check_availability`, `book_appointment`) with descriptions that prime the agent on bucket eligibility (prospect only — never customer/vendor/wrong-number) and read-aloud rules (offer 2–3 slots, not 8). `vapi-system-prompt-addendum.md` covers the booking flow end-to-end: when to invoke each tool, three-strike indecision fallback (offer slots → narrow morning/afternoon → text the booking link → human handoff), `SLOT_TAKEN` recovery (apologize, immediately re-call `check_availability`), email refusal (proceed with `null`), and the confirmation script. `scripts/test-cal-endpoints.sh` (chmod +x) runs four smoke tests against `BASE_URL` (defaults to https://ringdesk.co): list slots, book the first slot, re-book the same slot expecting `SLOT_TAKEN`, and book a second slot with `email: null`; supports `DRY_RUN=1`. Authoritative top sections updated: "What's in Phase 1" gains a Cal.com integration bullet and the Calendly bullet now notes its slated swap; "Tech stack" adds `date-fns`/`date-fns-tz` and the Vercel-API-routes pattern (typed lib → thin route → external tool def); "External links" adds the Cal.com booking URL and clarifies the Calendly status; "Conventions for Claude Code → Extensibility patterns" gains an "External tool integrations" entry codifying the typed-helper / route / tool-def file split. New `Cal.com Integration` section before Recent Changes documents account, env vars, route contracts, Vapi-tools handoff, prompt addendum, the test script, and the Phase 2 known constraint that Cal.com is for Tony's discovery calls only — customer-facing service-appointment booking for plumbers/HVAC/electricians needs a field-service-software integration in Phase 2 (Housecall Pro/Jobber/ServiceTitan), not Cal.com. ⚠️ ACTION REQUIRED for Tony to ship: (1) push branch and let Vercel auto-deploy, (2) run `./scripts/test-cal-endpoints.sh` against production, (3) paste `vapi-tools.json` definitions into Vapi dashboard → Tools and attach both to assistant `53ca6567-707b-46bf-bfd7-cc80abcb9fb7`, (4) append `vapi-system-prompt-addendum.md` to the existing Vapi system prompt, (5) place a real test call to (970) 528-8725 to verify end-to-end.
