@@ -234,14 +234,51 @@ export async function getAvailableSlots(
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
+    console.warn("=== CAL.COM RAW RESPONSE (non-2xx) ===");
+    console.warn(`status: ${res.status}`);
+    console.warn(`body: ${text.slice(0, 2000)}`);
+    console.warn("=== END ===");
     throw new CalError(
       "API_ERROR",
       `Cal.com /slots returned ${res.status}: ${text.slice(0, 500)}`,
     );
   }
 
-  const payload = (await res.json()) as CalSlotsResponse;
-  const slotsByDay = extractSlotsByDay(payload);
+  // DIAGNOSTIC: dump the raw Cal.com response so we can see what shape it
+  // actually has. Read the body as text first so we can both log it and
+  // still parse it safely afterward.
+  const rawText = await res.text();
+  console.log("=== CAL.COM RAW RESPONSE ===");
+  console.log(`status: ${res.status}`);
+  console.log(`url: ${url.toString()}`);
+  try {
+    const pretty = JSON.stringify(JSON.parse(rawText), null, 2);
+    console.log(`body (parsed):\n${pretty}`);
+  } catch {
+    console.log(`body (raw, not JSON):\n${rawText.slice(0, 4000)}`);
+  }
+  console.log("=== END ===");
+
+  let payload: CalSlotsResponse;
+  try {
+    payload = JSON.parse(rawText) as CalSlotsResponse;
+  } catch (err) {
+    throw new CalError(
+      "API_ERROR",
+      `Cal.com /slots returned non-JSON body: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+
+  let slotsByDay: CalSlotsByDay;
+  try {
+    slotsByDay = extractSlotsByDay(payload);
+  } catch (err) {
+    console.error("=== PARSE FAILURE in extractSlotsByDay ===");
+    console.error(err);
+    console.error("payload was:", JSON.stringify(payload).slice(0, 2000));
+    console.error("=== END ===");
+    throw err;
+  }
 
   if (!slotsByDay || Object.keys(slotsByDay).length === 0) {
     throw new CalError(
@@ -250,7 +287,26 @@ export async function getAvailableSlots(
     );
   }
 
-  const picked = pickSlots(slotsByDay, now);
+  let picked: { iso: string[]; rawSlots: string[] };
+  try {
+    picked = pickSlots(slotsByDay, now);
+  } catch (err) {
+    console.error("=== PARSE FAILURE in pickSlots ===");
+    console.error(err);
+    console.error(
+      "slotsByDay days:",
+      Object.keys(slotsByDay).slice(0, 20).join(", "),
+    );
+    console.error(
+      "first day's slots sample:",
+      JSON.stringify(
+        slotsByDay[Object.keys(slotsByDay)[0]]?.slice(0, 3) ?? null,
+      ),
+    );
+    console.error("=== END ===");
+    throw err;
+  }
+
   if (picked.iso.length === 0) {
     throw new CalError(
       "NO_AVAILABILITY",
@@ -258,8 +314,19 @@ export async function getAvailableSlots(
     );
   }
 
+  let formatted: SlotOption[];
+  try {
+    formatted = picked.iso.map(formatSlot);
+  } catch (err) {
+    console.error("=== PARSE FAILURE in formatSlot ===");
+    console.error(err);
+    console.error("picked.iso was:", JSON.stringify(picked.iso));
+    console.error("=== END ===");
+    throw err;
+  }
+
   return {
-    slots: picked.iso.map(formatSlot),
+    slots: formatted,
     rawSlots: picked.rawSlots,
   };
 }
