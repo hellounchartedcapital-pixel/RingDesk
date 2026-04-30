@@ -13,13 +13,22 @@ import {
 import { CallCTA } from "@/components/call-cta";
 import { SiteLogo } from "@/components/site-logo";
 import { SiteFooter } from "@/components/site-footer";
-import { CALENDLY_URL, CONTACT_EMAIL, SITE_URL } from "@/lib/constants";
+import {
+  BOOKING_CTA_LABEL,
+  CALENDLY_URL,
+  CONTACT_EMAIL,
+  SITE_URL,
+} from "@/lib/constants";
+import { LOCATIONS, LOCATION_SLUGS } from "@/lib/locations";
 import {
   TRADE_SLUGS,
   getOtherTrades,
   getTrade,
 } from "@/lib/trades";
-import { buildTradePageSchema } from "@/lib/schema";
+import {
+  buildBreadcrumbSchema,
+  buildTradePageSchema,
+} from "@/lib/schema";
 
 type Params = { trade: string };
 
@@ -62,7 +71,12 @@ export default async function TradePage({
   if (!trade) notFound();
 
   const otherTrades = getOtherTrades(slug);
+  const canonical = `${SITE_URL}/for/${trade.slug}`;
   const schema = buildTradePageSchema(trade.faqs);
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: "Home", url: SITE_URL },
+    { name: `For ${trade.displayName}`, url: canonical },
+  ]);
 
   return (
     <main className="min-h-screen bg-white">
@@ -75,7 +89,7 @@ export default async function TradePage({
           rel="noopener noreferrer"
           className="text-sm font-medium text-[color:var(--brand-slate)] hover:text-[color:var(--brand-indigo)]"
         >
-          Book a call
+          {BOOKING_CTA_LABEL}
         </Link>
       </div>
 
@@ -98,7 +112,7 @@ export default async function TradePage({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Book a 15-min call
+                {BOOKING_CTA_LABEL}
               </Link>
             </Button>
             <Button size="xl" variant="outline" asChild>
@@ -216,6 +230,49 @@ export default async function TradePage({
         </div>
       </section>
 
+      {/* Locations cross-link */}
+      <section className="bg-white py-16 sm:py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <h2 className="text-balance text-center text-3xl font-bold tracking-tight text-[color:var(--brand-slate)] sm:text-4xl">
+            Trades in Northern Colorado
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-center text-lg text-[color:var(--brand-muted)]">
+            Local context, service areas, and call volume notes for the
+            cities we tune for out of the box.
+          </p>
+          <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-2">
+            {LOCATION_SLUGS.map((locationSlug) => {
+              const location = LOCATIONS[locationSlug];
+              return (
+                <Link
+                  key={locationSlug}
+                  href={`/locations/${location.slug}`}
+                  className="group block"
+                >
+                  <Card className="h-full transition-colors group-hover:border-[color:var(--brand-indigo)]">
+                    <CardContent className="flex h-full flex-col p-8 pt-8">
+                      <p className="text-sm font-semibold uppercase tracking-widest text-[color:var(--brand-indigo)]">
+                        {location.fullName}
+                      </p>
+                      <h3 className="mt-3 text-xl font-semibold tracking-tight text-[color:var(--brand-slate)]">
+                        {trade.displayName} in {location.displayName}
+                      </h3>
+                      <p className="mt-3 text-sm leading-relaxed text-[color:var(--brand-slate)]/80">
+                        Service areas include {location.displayName} and
+                        nearby {location.nearbyAreas.slice(0, 3).join(", ")}.
+                      </p>
+                      <p className="mt-6 text-sm font-medium text-[color:var(--brand-indigo)]">
+                        See {location.displayName} page →
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="bg-[color:var(--brand-slate)] py-16 text-white sm:py-24">
         <div className="mx-auto max-w-3xl px-6 text-center">
@@ -233,7 +290,7 @@ export default async function TradePage({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Book a 15-min call
+                {BOOKING_CTA_LABEL}
               </Link>
             </Button>
           </div>
@@ -277,6 +334,13 @@ export default async function TradePage({
         type="application/ld+json"
         // Trade-specific FAQPage; static per route.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+      <script
+        type="application/ld+json"
+        // BreadcrumbList: Home › For [Trade].
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema),
+        }}
       />
     </main>
   );

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
+  BOOKING_CTA_LABEL,
   CALENDLY_URL,
   STRIPE_PREMIUM_URL,
   STRIPE_STANDARD_URL,
@@ -127,7 +128,7 @@ export function Pricing() {
             rel="noopener noreferrer"
             className="font-medium text-[color:var(--brand-indigo)] hover:underline"
           >
-            Book a 15-min call
+            {BOOKING_CTA_LABEL}
           </Link>{" "}
           and we&rsquo;ll figure out together.
         </p>

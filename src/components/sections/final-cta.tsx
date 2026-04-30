@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CallCTA } from "@/components/call-cta";
-import { CALENDLY_URL, CONTACT_EMAIL } from "@/lib/constants";
+import { BOOKING_CTA_LABEL, CALENDLY_URL, CONTACT_EMAIL } from "@/lib/constants";
 
 export function FinalCTA() {
   return (
@@ -22,7 +22,7 @@ export function FinalCTA() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Book a call
+              {BOOKING_CTA_LABEL}
             </Link>
           </Button>
         </div>

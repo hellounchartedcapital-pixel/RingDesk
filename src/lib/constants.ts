@@ -29,3 +29,10 @@ export const STRIPE_PREMIUM_URL =
   "https://buy.stripe.com/dRm00l60d7uM3tE2ir04801";
 
 export const CONTACT_EMAIL = "tony@ringdesk.co";
+
+// Canonical CTA label used wherever the booking action is exposed
+// (header links, hero buttons, pricing fallback link, final-CTA buttons).
+// Prose copy that happens to contain the phrase verbatim — like the
+// final-CTA section heading — is intentionally NOT routed through this
+// constant; only repeated CTA elements are.
+export const BOOKING_CTA_LABEL = "Book a 15-min call";

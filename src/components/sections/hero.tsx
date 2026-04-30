@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { CallCTA } from "@/components/call-cta";
 import { Card } from "@/components/ui/card";
 import { SiteLogo } from "@/components/site-logo";
-import { CALENDLY_URL } from "@/lib/constants";
+import { BOOKING_CTA_LABEL, CALENDLY_URL } from "@/lib/constants";
 
 const audioSampleAvailable =
   process.env.NEXT_PUBLIC_AUDIO_SAMPLE_AVAILABLE === "true";
@@ -19,7 +19,7 @@ export function Hero() {
           rel="noopener noreferrer"
           className="text-sm font-medium text-[color:var(--brand-slate)] hover:text-[color:var(--brand-indigo)]"
         >
-          Book a call
+          {BOOKING_CTA_LABEL}
         </Link>
       </div>
 
@@ -40,7 +40,7 @@ export function Hero() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Book a 15-min call
+              {BOOKING_CTA_LABEL}
             </Link>
           </Button>
           {audioSampleAvailable ? (
