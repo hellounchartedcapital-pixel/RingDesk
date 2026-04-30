@@ -30,6 +30,13 @@ export const STRIPE_PREMIUM_URL =
 
 export const CONTACT_EMAIL = "tony@ringdesk.co";
 
+// Pilot scarcity. Update these as slots fill — pricing.tsx composes the
+// rendered scarcity sentence from these values plus PILOT_SLOT_BREAKDOWN.
+export const PILOT_SLOTS_REMAINING = 3;
+export const PILOT_TARGET_TRADES = "plumbing, HVAC, and electrical";
+export const PILOT_SLOT_BREAKDOWN = "1 plumbing, 1 HVAC, 1 electrical";
+export const PILOT_GEO = "US-based";
+
 // Canonical CTA label used wherever the booking action is exposed
 // (header links, hero buttons, pricing fallback link, final-CTA buttons).
 // Prose copy that happens to contain the phrase verbatim — like the

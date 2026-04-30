@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import { Hero } from "@/components/sections/hero";
 import { Problem } from "@/components/sections/problem";
 import { HowItWorks } from "@/components/sections/how-it-works";
+import { Comparison } from "@/components/sections/comparison";
 import { Pricing } from "@/components/sections/pricing";
+import { Founder } from "@/components/sections/founder";
 import { FAQ } from "@/components/sections/faq";
 import { FinalCTA } from "@/components/sections/final-cta";
 import { TradesCrossLinks } from "@/components/sections/trades-cross-links";
@@ -30,7 +32,9 @@ export default function HomePage() {
       <Hero />
       <Problem />
       <HowItWorks />
+      <Comparison />
       <Pricing />
+      <Founder />
       <FAQ />
       <TradesCrossLinks />
       <FinalCTA />

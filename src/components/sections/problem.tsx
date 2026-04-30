@@ -2,16 +2,16 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const stats = [
   {
-    headline: "30%+ of inbound calls",
-    body: "to trades businesses go unanswered during busy hours",
+    headline: "62% of inbound calls",
+    body: "to small service businesses go unanswered during business hours",
   },
   {
     headline: "$400 average",
-    body: "value of a service call in plumbing, HVAC, electrical",
+    body: "value of a service call in plumbing, HVAC, and electrical",
   },
   {
-    headline: "78% of callers",
-    body: "won't leave a voicemail — they call the next number",
+    headline: "85% of unanswered callers",
+    body: "never call back, and 62% will call a competitor instead",
   },
 ];
 
@@ -41,10 +41,21 @@ export function Problem() {
           ))}
         </div>
 
-        <p className="mx-auto mt-12 max-w-3xl text-center text-base text-[color:var(--brand-muted)] sm:text-lg">
-          We built RingDesk because every missed call is a customer calling
-          someone else next.
+        <p className="mt-6 text-center text-xs text-[color:var(--brand-muted)]">
+          Sources: 411 Locals (2024 study, 85 businesses), PATLive research,
+          industry averages.
         </p>
+
+        <div className="mx-auto mt-16 max-w-3xl text-center">
+          <p className="text-balance text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
+            5 missed calls × $400 ={" "}
+            <span className="whitespace-nowrap">$2,000 / week</span>
+          </p>
+          <p className="mx-auto mt-5 max-w-xl text-base text-[color:var(--brand-muted)] sm:text-lg">
+            RingDesk: $249/month. About 2 hours of jobs per year recovers
+            the cost.
+          </p>
+        </div>
       </div>
     </section>
   );

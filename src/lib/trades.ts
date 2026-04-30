@@ -8,11 +8,21 @@ export type ValueProp = {
   description: string;
 };
 
-export type TradeContent = {
+// Fields shared by every trade entry — both the fully-built ones
+// (rendered as a /for/[slug] page) and the coming-soon stubs (rendered
+// only as a non-link card on the homepage).
+type TradeContentBase = {
   slug: string;
   displayName: string;
   displayNameSingular: string;
   category: string;
+  cardSummary: string;
+  metaTitle: string;
+  metaDescription: string;
+};
+
+export type TradeContent = TradeContentBase & {
+  comingSoon?: false;
   heroHeadline: string;
   heroSubheadline: string;
   valueProps: ValueProp[];
@@ -20,16 +30,22 @@ export type TradeContent = {
   avgJobValueText: string;
   testimonialPlaceholder: string;
   faqs: FAQ[];
-  metaTitle: string;
-  metaDescription: string;
 };
 
-export const TRADES: Record<string, TradeContent> = {
+export type TradeStub = TradeContentBase & {
+  comingSoon: true;
+};
+
+export type AnyTrade = TradeContent | TradeStub;
+
+export const TRADES: Record<string, AnyTrade> = {
   plumbers: {
     slug: "plumbers",
     displayName: "Plumbers",
     displayNameSingular: "Plumber",
     category: "Plumbing",
+    cardSummary:
+      "Tuned for emergency triage, water-heater quotes, and service-area calls.",
     heroHeadline: "Stop losing $400 plumbing calls to your competitor.",
     heroSubheadline:
       "RingDesk is an AI receptionist installed and tuned for plumbing businesses. We answer every call 24/7, qualify emergencies, schedule service calls, and text you the urgent ones. Built for the trade where every missed call is a customer calling the next plumber on the list.",
@@ -94,6 +110,8 @@ export const TRADES: Record<string, TradeContent> = {
     displayName: "HVAC Contractors",
     displayNameSingular: "HVAC Contractor",
     category: "HVAC",
+    cardSummary:
+      "Tuned for AC outages, no-heat emergencies, and seasonal demand spikes.",
     heroHeadline: "Stop losing service calls every time the AC goes out.",
     heroSubheadline:
       "RingDesk is an AI receptionist installed and tuned for HVAC contractors. We answer every call 24/7, qualify emergencies, capture service requests, and text you the urgent ones. Built for the trade where summer heatwaves and winter cold snaps mean every missed call is a customer calling your competitor.",
@@ -156,14 +174,73 @@ export const TRADES: Record<string, TradeContent> = {
     metaDescription:
       "AI receptionist built for HVAC contractors in Northern Colorado. Answers every call 24/7, triages no-AC and no-heat emergencies, books maintenance. $249/mo flat.",
   },
+  electricians: {
+    slug: "electricians",
+    displayName: "Electricians",
+    displayNameSingular: "Electrician",
+    category: "Electrical",
+    comingSoon: true,
+    cardSummary:
+      "Coming soon — tuned for panel upgrades, outage emergencies, and service-call quoting.",
+    metaTitle:
+      "AI Receptionist for Electricians in Northern Colorado | RingDesk",
+    metaDescription:
+      "AI receptionist for electricians in Northern Colorado. Built for outage emergencies, panel upgrades, and service-call quoting. $249/mo flat. Coming soon.",
+  },
+  roofers: {
+    slug: "roofers",
+    displayName: "Roofers",
+    displayNameSingular: "Roofer",
+    category: "Roofing",
+    comingSoon: true,
+    cardSummary:
+      "Coming soon — tuned for storm-damage triage, inspection scheduling, and insurance-claim calls.",
+    metaTitle:
+      "AI Receptionist for Roofers in Northern Colorado | RingDesk",
+    metaDescription:
+      "AI receptionist for roofing companies in Northern Colorado. Built for storm-damage triage and inspection scheduling. $249/mo flat. Coming soon.",
+  },
+  "garage-door": {
+    slug: "garage-door",
+    displayName: "Garage Door Companies",
+    displayNameSingular: "Garage Door Tech",
+    category: "Garage Door",
+    comingSoon: true,
+    cardSummary:
+      "Coming soon — tuned for stuck-door emergencies, opener replacements, and same-day service.",
+    metaTitle:
+      "AI Receptionist for Garage Door Companies in Northern Colorado | RingDesk",
+    metaDescription:
+      "AI receptionist for garage door companies in Northern Colorado. Built for stuck-door emergencies and same-day service. $249/mo flat. Coming soon.",
+  },
+  landscaping: {
+    slug: "landscaping",
+    displayName: "Landscaping Companies",
+    displayNameSingular: "Landscaper",
+    category: "Landscaping",
+    comingSoon: true,
+    cardSummary:
+      "Coming soon — tuned for seasonal scheduling, quote intake, and recurring-service booking.",
+    metaTitle:
+      "AI Receptionist for Landscaping Companies in Northern Colorado | RingDesk",
+    metaDescription:
+      "AI receptionist for landscaping companies in Northern Colorado. Built for seasonal scheduling and quote intake. $249/mo flat. Coming soon.",
+  },
 };
 
 export const TRADE_SLUGS = Object.keys(TRADES);
 
-export function getTrade(slug: string): TradeContent | undefined {
+export const ACTIVE_TRADE_SLUGS = TRADE_SLUGS.filter(
+  (slug) => !TRADES[slug].comingSoon,
+);
+
+export function getTrade(slug: string): AnyTrade | undefined {
   return TRADES[slug];
 }
 
+// Returns the active (non-stub) trades other than the given slug.
 export function getOtherTrades(slug: string): TradeContent[] {
-  return TRADE_SLUGS.filter((s) => s !== slug).map((s) => TRADES[s]);
+  return ACTIVE_TRADE_SLUGS.filter((s) => s !== slug)
+    .map((s) => TRADES[s])
+    .filter((t): t is TradeContent => !t.comingSoon);
 }
