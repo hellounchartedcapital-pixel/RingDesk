@@ -43,7 +43,7 @@ export const LOCATIONS: Record<string, LocationContent> = {
     metaTitle:
       "AI Receptionist & Answering Service in Loveland, CO | RingDesk",
     metaDescription:
-      "AI receptionist for Loveland, CO trades businesses. Answers every call 24/7, qualifies leads, texts you the urgent ones. Built for plumbers, HVAC, electricians. $249/mo.",
+      "AI receptionist for Loveland, CO trades. A real person installs and tunes it. Answers 24/7, qualifies leads, texts you the urgent ones. $249/mo.",
   },
   "fort-collins": {
     slug: "fort-collins",
@@ -72,9 +72,9 @@ export const LOCATIONS: Record<string, LocationContent> = {
     testimonialPlaceholder:
       "[Fort Collins-based pilot customer testimonial — coming soon. Want to be the first Fort Collins trades business featured here?]",
     metaTitle:
-      "AI Receptionist & Answering Service in Fort Collins, CO | RingDesk",
+      "AI Receptionist for Fort Collins, CO Trades | RingDesk",
     metaDescription:
-      "AI receptionist for Fort Collins, CO trades businesses. Answers every call 24/7, qualifies leads, captures customer details. Built for plumbers, HVAC, electricians. $249/mo.",
+      "AI receptionist for Fort Collins, CO trades. A real person installs and tunes it. Answers 24/7, qualifies leads, captures details. $249/mo.",
   },
 };
 

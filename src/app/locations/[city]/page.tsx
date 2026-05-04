@@ -11,7 +11,9 @@ import {
   BOOKING_CTA_LABEL,
   CALENDLY_URL,
   CONTACT_EMAIL,
+  OG_DEFAULTS,
   SITE_URL,
+  TWITTER_DEFAULTS,
 } from "@/lib/constants";
 import {
   LOCATION_SLUGS,
@@ -43,11 +45,13 @@ export async function generateMetadata({
     description: location.metaDescription,
     alternates: { canonical },
     openGraph: {
+      ...OG_DEFAULTS,
       title: location.metaTitle,
       description: location.metaDescription,
       url: canonical,
     },
     twitter: {
+      ...TWITTER_DEFAULTS,
       title: location.metaTitle,
       description: location.metaDescription,
     },
