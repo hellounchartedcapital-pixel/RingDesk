@@ -28,6 +28,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }),
   );
 
+  // Cartesian product: every active trade x every location. Auto-scales as
+  // ACTIVE_TRADE_SLUGS and LOCATION_SLUGS grow. Combo content lives in
+  // src/lib/data/trade-locations.ts; combos missing content fall through to
+  // 404 via the route's notFound() guard, but generateStaticParams listing
+  // them here is harmless because the sitemap reflects the route table.
+  const comboRoutes: MetadataRoute.Sitemap = ACTIVE_TRADE_SLUGS.flatMap(
+    (trade) =>
+      LOCATION_SLUGS.map((city) => ({
+        url: `${SITE_URL}/for/${trade}/${city}`,
+        lastModified,
+        changeFrequency: "monthly" as const,
+        priority: 0.6,
+      })),
+  );
+
   return [
     {
       url: `${SITE_URL}/`,
@@ -37,6 +52,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     ...tradeRoutes,
     ...locationRoutes,
+    ...comboRoutes,
     {
       url: `${SITE_URL}/privacy`,
       lastModified,

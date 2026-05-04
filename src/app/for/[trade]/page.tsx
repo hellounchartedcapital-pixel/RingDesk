@@ -28,6 +28,7 @@ import {
   getOtherTrades,
   getTrade,
 } from "@/lib/trades";
+import { TRADE_LOCATIONS } from "@/lib/data/trade-locations";
 import {
   buildBreadcrumbSchema,
   buildTradePageSchema,
@@ -239,23 +240,26 @@ export default async function TradePage({
         </div>
       </section>
 
-      {/* Locations cross-link */}
+      {/* Cities we serve — links to /for/[trade]/[city] combo pages */}
       <section className="bg-white py-16 sm:py-24">
         <div className="mx-auto max-w-6xl px-6">
           <h2 className="text-balance text-center text-3xl font-bold tracking-tight text-[color:var(--brand-slate)] sm:text-4xl">
-            Trades in Northern Colorado
+            Cities we serve
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-center text-lg text-[color:var(--brand-muted)]">
-            Local context, service areas, and call volume notes for the
-            cities we tune for out of the box.
+            City-specific deep dives for {trade.displayName.toLowerCase()} —
+            local service area, call types, and FAQ.
           </p>
           <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-2">
-            {LOCATION_SLUGS.map((locationSlug) => {
+            {LOCATION_SLUGS.filter(
+              (locationSlug) =>
+                `${trade.slug}-${locationSlug}` in TRADE_LOCATIONS,
+            ).map((locationSlug) => {
               const location = LOCATIONS[locationSlug];
               return (
                 <Link
                   key={locationSlug}
-                  href={`/locations/${location.slug}`}
+                  href={`/for/${trade.slug}/${location.slug}`}
                   className="group block"
                 >
                   <Card className="h-full transition-colors group-hover:border-[color:var(--brand-indigo)]">
@@ -267,11 +271,15 @@ export default async function TradePage({
                         {trade.displayName} in {location.displayName}
                       </h3>
                       <p className="mt-3 text-sm leading-relaxed text-[color:var(--brand-slate)]/80">
-                        Service areas include {location.displayName} and
-                        nearby {location.nearbyAreas.slice(0, 3).join(", ")}.
+                        How RingDesk works for{" "}
+                        {trade.displayName.toLowerCase()} in{" "}
+                        {location.displayName} — service area covers{" "}
+                        {location.displayName} and nearby{" "}
+                        {location.nearbyAreas.slice(0, 3).join(", ")}.
                       </p>
                       <p className="mt-6 text-sm font-medium text-[color:var(--brand-indigo)]">
-                        See {location.displayName} page →
+                        See {trade.displayName.toLowerCase()} in{" "}
+                        {location.displayName} →
                       </p>
                     </CardContent>
                   </Card>
