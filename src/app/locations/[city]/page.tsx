@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { CallCTA } from "@/components/call-cta";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,8 +26,10 @@ import {
   getLocation,
 } from "@/lib/locations";
 import { ACTIVE_TRADE_SLUGS, TRADES } from "@/lib/trades";
+import { TRADE_LOCATIONS } from "@/lib/data/trade-locations";
 import {
   buildBreadcrumbSchema,
+  buildFaqPageSchema,
   buildLocationBusinessSchema,
 } from "@/lib/schema";
 
@@ -78,6 +86,20 @@ export default async function LocationPage({
     { name: "Locations" }, // no /locations index page; name-only is valid
     { name: location.displayName, url: canonical },
   ]);
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@graph": [buildFaqPageSchema(location.faqs)],
+  };
+
+  // Combo cross-links: every active trade that has combo content for this
+  // city. Filter rather than assume so a trade without a combo entry simply
+  // doesn't render a card.
+  const comboLinks = ACTIVE_TRADE_SLUGS.filter(
+    (tradeSlug) => `${tradeSlug}-${location.slug}` in TRADE_LOCATIONS,
+  ).map((tradeSlug) => ({
+    tradeSlug,
+    trade: TRADES[tradeSlug],
+  }));
 
   return (
     <main className="min-h-screen bg-white">
@@ -211,6 +233,72 @@ export default async function LocationPage({
         </div>
       </section>
 
+      {/* Trade x location combo cross-links */}
+      {comboLinks.length > 0 ? (
+        <section className="bg-[color:var(--brand-bg-secondary)] py-16 sm:py-24">
+          <div className="mx-auto max-w-6xl px-6">
+            <h2 className="text-balance text-center text-3xl font-bold tracking-tight text-[color:var(--brand-slate)] sm:text-4xl">
+              Services we offer in {location.displayName}
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-center text-lg text-[color:var(--brand-muted)]">
+              Trade-specific deep dives for {location.displayName} businesses
+              — what we tune, what we handle, and the FAQs we hear most.
+            </p>
+            <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-2">
+              {comboLinks.map(({ tradeSlug, trade }) => (
+                <Link
+                  key={tradeSlug}
+                  href={`/for/${tradeSlug}/${location.slug}`}
+                  className="group block"
+                >
+                  <Card className="h-full transition-colors group-hover:border-[color:var(--brand-indigo)]">
+                    <CardContent className="flex h-full flex-col p-8 pt-8">
+                      <p className="text-sm font-semibold uppercase tracking-widest text-[color:var(--brand-indigo)]">
+                        {location.fullName}
+                      </p>
+                      <h3 className="mt-3 text-xl font-semibold tracking-tight text-[color:var(--brand-slate)]">
+                        {trade.displayName} in {location.displayName}
+                      </h3>
+                      <p className="mt-3 text-sm leading-relaxed text-[color:var(--brand-slate)]/80">
+                        How RingDesk works for{" "}
+                        {trade.displayName.toLowerCase()} in{" "}
+                        {location.displayName} — service area, call types,
+                        FAQ.
+                      </p>
+                      <p className="mt-6 text-sm font-medium text-[color:var(--brand-indigo)]">
+                        See the {trade.displayName.toLowerCase()} in{" "}
+                        {location.displayName} page →
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* FAQ */}
+      <section className="bg-white py-16 sm:py-24">
+        <div className="mx-auto max-w-3xl px-6">
+          <h2 className="text-balance text-center text-3xl font-bold tracking-tight text-[color:var(--brand-slate)] sm:text-4xl">
+            {location.displayName} FAQ
+          </h2>
+          <Accordion type="single" collapsible className="mt-12 w-full">
+            {location.faqs.map((faq, i) => (
+              <AccordionItem key={faq.question} value={`item-${i}`}>
+                <AccordionTrigger className="text-[color:var(--brand-slate)]">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-[color:var(--brand-slate)]/80">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
       {/* Testimonial placeholder */}
       <section className="bg-[color:var(--brand-bg-secondary)] py-16 sm:py-24">
         <div className="mx-auto max-w-3xl px-6">
@@ -281,6 +369,12 @@ export default async function LocationPage({
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(breadcrumbSchema),
         }}
+      />
+      <script
+        type="application/ld+json"
+        // Location-page FAQPage; only injected because the page now renders
+        // the FAQs (Google guidance — don't ship FAQPage without visible FAQs).
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
     </main>
   );

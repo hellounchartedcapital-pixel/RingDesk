@@ -151,6 +151,46 @@ export function buildBreadcrumbSchema(items: BreadcrumbItem[]) {
   };
 }
 
+// Combo-page Service entity — narrow Service @id'd to the trade+city pair so
+// it doesn't collide with the generic Standard/Premium services emitted from
+// the layout. Used on /for/[trade]/[city].
+export function buildComboServiceSchema({
+  tradeSlug,
+  citySlug,
+  tradeName,
+  cityName,
+  url,
+}: {
+  tradeSlug: string;
+  citySlug: string;
+  tradeName: string;
+  cityName: string;
+  url: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${SITE_URL}/#service-${tradeSlug}-${citySlug}`,
+    name: `AI Receptionist for ${tradeName} in ${cityName}, CO`,
+    description: `Done-for-you AI receptionist tuned for ${tradeName.toLowerCase()} in ${cityName}, Colorado. Answers every call, qualifies leads, books appointments, and texts urgent jobs to your phone.`,
+    provider: { "@id": BUSINESS_ID },
+    areaServed: { "@type": "City", name: cityName },
+    url,
+    offers: {
+      "@type": "Offer",
+      price: "249",
+      priceCurrency: "USD",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: "249",
+        priceCurrency: "USD",
+        billingIncrement: 1,
+        unitCode: "MON",
+      },
+    },
+  };
+}
+
 export function buildLocationBusinessSchema({
   slug,
   city,
