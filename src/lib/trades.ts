@@ -103,7 +103,7 @@ export const TRADES: Record<string, AnyTrade> = {
     metaTitle:
       "AI Receptionist for Plumbers in Northern Colorado | RingDesk",
     metaDescription:
-      "AI receptionist built for plumbing businesses in Northern Colorado. Answers every call 24/7, triages emergencies, captures quote requests. $249/mo flat. Cancel anytime.",
+      "AI receptionist for plumbers in Northern Colorado. A real person installs and tunes it. Triages emergencies, captures quotes. $249/mo. Cancel anytime.",
   },
   hvac: {
     slug: "hvac",
@@ -170,9 +170,9 @@ export const TRADES: Record<string, AnyTrade> = {
       },
     ],
     metaTitle:
-      "AI Receptionist for HVAC Contractors in Northern Colorado | RingDesk",
+      "AI Receptionist for HVAC in Northern Colorado | RingDesk",
     metaDescription:
-      "AI receptionist built for HVAC contractors in Northern Colorado. Answers every call 24/7, triages no-AC and no-heat emergencies, books maintenance. $249/mo flat.",
+      "AI receptionist for HVAC contractors in Northern Colorado. A real person installs and tunes it. Triages no-heat/no-AC emergencies, books maintenance. $249/mo.",
   },
   electricians: {
     slug: "electricians",

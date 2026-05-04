@@ -6,10 +6,34 @@ export const SITE_TITLE_DEFAULT =
 export const HOME_TITLE =
   "AI receptionist for trades in Northern Colorado | RingDesk";
 export const SITE_DESCRIPTION =
-  "AI receptionist for plumbers, HVAC, electricians, and trades in Northern Colorado. Installed and tuned by a real person. Stop missing service calls — $249/mo flat, cancel anytime.";
+  "AI receptionist for plumbers, HVAC, and trades in Northern Colorado. Installed and tuned by a real person. Stop missing service calls. $249/mo, cancel anytime.";
 
 export const OG_IMAGE_PATH = "/og-image.png";
 export const OG_IMAGE_ALT = "RingDesk — AI receptionist for trades";
+
+// Shared Open Graph + Twitter base. Page-level openGraph/twitter objects
+// in Next.js metadata REPLACE the parent layout's, they do not deep-merge,
+// so any page that overrides openGraph/twitter must spread these values
+// in to retain the image, dimensions, type, locale, siteName, and large-image
+// Twitter card. See PR fixing audit finding #1 (2026-05-04).
+export const OG_DEFAULTS = {
+  type: "website" as const,
+  locale: "en_US",
+  siteName: SITE_NAME,
+  images: [
+    {
+      url: OG_IMAGE_PATH,
+      width: 1200,
+      height: 630,
+      alt: OG_IMAGE_ALT,
+    },
+  ],
+};
+
+export const TWITTER_DEFAULTS = {
+  card: "summary_large_image" as const,
+  images: [OG_IMAGE_PATH],
+};
 
 export const RINGDESK_PHONE = "+1-970-528-8725";
 
